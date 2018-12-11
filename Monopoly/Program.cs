@@ -1,12 +1,11 @@
-﻿using System;
-
-namespace Monopoly
+﻿namespace Monopoly
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Monopoly monopoly = new Monopoly(1, 3);
+            monopoly.SetUp().Start();
         }
     }
 }
