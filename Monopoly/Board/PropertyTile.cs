@@ -54,7 +54,7 @@ namespace Monopoly
                 {
                     int rent = Rent;
                     visitor.Pay(Owner, ref rent);
-                    Console.WriteLine($"{visitor.DisplayName} paid {rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Houses: {HouseCount}]");
+                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Houses: {HouseCount}]");
                 }
                 else // Owner visiting
                 {
@@ -62,12 +62,12 @@ namespace Monopoly
                     {
                         if (Owner.IsHuman)
                         {
-                            Console.WriteLine($"Do you want to upgrade {DisplayName} for {tileOptions.HouseCost}? (Y/n)");
+                            Console.WriteLine($"Do you want to upgrade {DisplayName} for ${tileOptions.HouseCost}? (Y/n)");
                             if (Console.ReadKey().Key != ConsoleKey.Y) return;
                         }
 
                         Upgrade();
-                        Console.WriteLine($"{Owner.DisplayName} upgraded {DisplayName} to {HouseCount} houses for {tileOptions.HouseCost}.");
+                        Console.WriteLine($"{Owner.DisplayName} upgraded {DisplayName} to {HouseCount} houses for ${tileOptions.HouseCost}.");
                     }
                 }
             }
@@ -77,12 +77,12 @@ namespace Monopoly
                 {
                     if (visitor.IsHuman)
                     {
-                        Console.WriteLine($"Do you want to purchase {DisplayName} for {tileOptions.Cost}? (Y/n)");
+                        Console.WriteLine($"Do you want to purchase {DisplayName} for ${tileOptions.Cost}? (Y/n)");
                         if (Console.ReadKey().Key != ConsoleKey.Y) return;
                     }
 
                     Purchase(visitor);
-                    Console.WriteLine($"{visitor.DisplayName} purchased {DisplayName} for {tileOptions.Cost}.");
+                    Console.WriteLine($"{visitor.DisplayName} purchased {DisplayName} for ${tileOptions.Cost}.");
                 }
             }
         }

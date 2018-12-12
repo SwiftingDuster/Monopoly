@@ -1,35 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace Monopoly
 {
     public class Monopoly
     {
+        public Queue<Player> Players { get; set; }
+
         private bool gameRunning;
         private Board board;
-        private Queue<Player> players;
 
         public Monopoly(int humanPlayers, int aiPlayers)
         {
-            players = new Queue<Player>();
+            Players = new Queue<Player>();
 
             for (int i = 0; i < humanPlayers; i++)
             {
-                players.Enqueue(new Player($"Player {i + 1}"));
+                Players.Enqueue(new Player($"Player {i + 1}"));
             }
 
             for (int i = humanPlayers; i < humanPlayers + aiPlayers; i++)
             {
-                players.Enqueue(new Player($"Player {i + 1} [AI]", false));
+                Players.Enqueue(new Player($"Player {i + 1} [AI]", false));
             }
         }
 
         public Monopoly SetUp()
         {
-            board = new Board();
+            board = new Board(this);
             return this;
         }
 
@@ -40,21 +39,21 @@ namespace Monopoly
             while (gameRunning)
             {
                 Console.WriteLine($"> Starting round {round++}.");
-                for (int i = 0; i < players.Count; i++)
+                for (int i = 0; i < Players.Count; i++)
                 {
-                    Player player = players.Dequeue();
+                    Player player = Players.Dequeue();
                     player.TakeTurn(board);
-                    if (!player.IsBankrupt) players.Enqueue(player);
+                    if (!player.IsBankrupt) Players.Enqueue(player);
                 }
                 Console.WriteLine("====================");
 
-                if (players.Count == 1)
+                if (Players.Count == 1)
                 {
                     break;
                 }
             }
 
-            Player winner = players.First();
+            Player winner = Players.First();
             int totalAssetValue = winner.OwnedTiles.Where(tile => !tile.IsMortgaged).Sum(tile => tile.TileOptions.Cost);
 
             Console.WriteLine($"{winner.DisplayName} won the game with ${winner.Money}, {winner.OwnedTiles.Count} owned properties and a total asset value of ${totalAssetValue}.");

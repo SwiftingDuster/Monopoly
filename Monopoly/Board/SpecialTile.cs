@@ -24,14 +24,19 @@ namespace Monopoly
                     Console.WriteLine($"{visitor.DisplayName} receives {Constants.GOAllowance} from the bank.");
                     break;
                 case SpecialTileType.Chance:
+                    ChanceCard chanceCard = SpecialCardDeck.GetChanceCard();
+                    Console.WriteLine($"{visitor.DisplayName} drew chance card: {chanceCard.DisplayName}");
+                    chanceCard.Use(visitor, board, board.Monopoly.Players);
                     break;
                 case SpecialTileType.CommunityChest:
+                    CommunityChest community = SpecialCardDeck.GetCommunityChest();
+                    Console.WriteLine($"{visitor.DisplayName} drew community chest: {community.DisplayName}");
+                    community.Use(visitor, board, board.Monopoly.Players);
                     break;
                 case SpecialTileType.VisitingJail:
                     break;
-                case SpecialTileType.GoToJail:
-                    visitor.BoardLocation = board.GetSpecialTileIndex(SpecialTileType.GoToJail)[0];
-                    Console.WriteLine($"{visitor.DisplayName} was sent to jail.");
+                case SpecialTileType.Jail:
+                    visitor.Jail(board);
                     break;
                 case SpecialTileType.FreeParking:
                     break;

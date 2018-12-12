@@ -52,7 +52,7 @@ namespace Monopoly
                 {
                     int rent = Rent;
                     visitor.Pay(Owner, ref rent);
-                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Railroad x{Owner.OwnedTiles.Where(tile => tile is UtilityTile).Count()}]");
+                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Owns x{Owner.OwnedTiles.Where(tile => tile is UtilityTile).Count()}.]");
                 }
             }
             else // Unowned property

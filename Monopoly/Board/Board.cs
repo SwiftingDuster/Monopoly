@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Linq;
 
 namespace Monopoly
 {
     public class Board
     {
         public int TileSize { get; private set; }
+        public Monopoly Monopoly { get; private set; }
 
         private readonly Tile[] tiles;
 
-        public Board(int tileSize = 40)
+        public Board(Monopoly monopoly, int tileSize = Constants.GameTilesTotal)
         {
+            Monopoly = monopoly;
+
             TileSize = tileSize;
             tiles = new Tile[tileSize];
 
@@ -49,7 +53,7 @@ namespace Monopoly
             tiles[28] = new UtilityTile(28, new UtilityTileOptions("Water Works", 150, 75));
             tiles[29] = new PropertyTile(29, new PropertyTileOptions("Marvin Gardens", 280, 150, 140, 24, 120, 330, 850, 1025, 1200));
 
-            tiles[30] = new SpecialTile(30, new TileOptions("Go To Jail"), SpecialTileType.GoToJail);
+            tiles[30] = new SpecialTile(30, new TileOptions("Go To Jail"), SpecialTileType.Jail);
             tiles[31] = new PropertyTile(31, new PropertyTileOptions("Pacific Avenue", 300, 200, 150, 26, 130, 390, 900, 1100, 1275));
             tiles[32] = new PropertyTile(32, new PropertyTileOptions("North Carolina Avenue", 300, 200, 150, 26, 130, 390, 900, 1100, 1275));
             tiles[33] = new SpecialTile(33, new TileOptions("Community Chest"), SpecialTileType.CommunityChest);
@@ -67,41 +71,64 @@ namespace Monopoly
             return tiles[position];
         }
 
-        public int[] GetSpecialTileIndex(SpecialTileType type)
+        public Tile Find(Func<Tile, bool> predicate)
+        {
+            return tiles.FirstOrDefault(predicate);
+        }
+
+        public Tile FindNearest(NearestType type, int boardLocation)
+        {
+            switch (type)
+            {
+                case NearestType.Railroad:
+                    return tiles.Where(tile => tile is RailroadTile).OrderBy(tile => Math.Abs(tile.BoardPosition - boardLocation)).First();
+                case NearestType.Utility:
+                    return tiles.Where(tile => tile is UtilityTile).OrderBy(tile => Math.Abs(tile.BoardPosition - boardLocation)).First();
+                default:
+                    throw new Exception($"Unhandled nearest tile type: {type}");
+            }
+        }
+
+        public Tile GetSpecialTile(SpecialTileType type)
         {
             switch (type)
             {
                 case SpecialTileType.GO:
-                    return new int[] { 0 };
-                case SpecialTileType.Chance:
-                    return new int[] { 7, 22, 36 };
-                case SpecialTileType.CommunityChest:
-                    return new int[] { 2, 17, 33 };
+                    return tiles[0];
                 case SpecialTileType.VisitingJail:
-                    return new int[] { 10 };
-                case SpecialTileType.GoToJail:
-                    return new int[] { 30 };
+                    return tiles[10];
+                case SpecialTileType.Jail:
+                    return tiles[30];
                 case SpecialTileType.FreeParking:
-                    return new int[] { 20 };
+                    return tiles[20];
                 case SpecialTileType.IncomeTax:
-                    return new int[] { 4 };
+                    return tiles[4];
                 case SpecialTileType.LuxuryTax:
-                    return new int[] { 38 };
+                    return tiles[38];
+                case SpecialTileType.Chance:
+                case SpecialTileType.CommunityChest:
+                    throw new Exception("Retrieving this tile is not supported.");
                 default:
                     throw new Exception($"Unhandled special tile type: {type}");
             }
         }
     }
+
+    public enum NearestType
+    {
+        Railroad,
+        Utility
+    }
     
     public enum SpecialTileType
     {
         GO,
-        Chance,
-        CommunityChest,
         VisitingJail,
-        GoToJail,
+        Jail,
         FreeParking,
         IncomeTax,
-        LuxuryTax
+        LuxuryTax,
+        Chance,
+        CommunityChest
     }
 }
