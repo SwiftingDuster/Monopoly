@@ -63,24 +63,23 @@ namespace Monopoly
                 Console.WriteLine($"{DisplayName} is visiting {tile.DisplayName}. {((tile is PropertyTile && ((PropertyTile)tile).Owner != null) ? $"[{((PropertyTile)tile).Owner.DisplayName}]" : String.Empty)}");
                 tile.OnVisit(this, board);
             }
-            
+
             var canUnmortgage = MortgagedTiles.Where(tile => Money > tile.TileOptions.UnMortgageValue).ToList();
             if (canUnmortgage.Count > 0)
             {
                 if (IsHuman)
                 {
-                    ConsoleKey key;
-                    do
-                    {
-                        Console.WriteLine($"Do you want to buy back any mortgaged property? (Y/n)");
-                        key = Console.ReadKey(true).Key;
+                    Console.WriteLine($"Do you want to buy back any mortgaged property? (Y/n)");
+                    ConsoleKey key = Console.ReadKey(true).Key;
 
-                        if (key == ConsoleKey.Y)
+                    if (key == ConsoleKey.Y)
+                    {
+                        do
                         {
                             for (int i = 0; i < canUnmortgage.Count(); i++)
                             {
                                 PurchasableRentTile tile = canUnmortgage[i];
-                                Console.WriteLine($"Choose the property to unmortgage by entering the corressponding number {i + 1}-{canUnmortgage.Count() - 1}:");
+                                Console.WriteLine($"Choose the property to unmortgage by entering the corressponding number:");
                                 Console.WriteLine($"{i + 1}. {tile.DisplayName} for ${tile.TileOptions.UnMortgageValue}.");
                             }
 
@@ -114,9 +113,12 @@ namespace Monopoly
 
                             PurchasableRentTile tileToBuyBack = canUnmortgage[choice];
                             tileToBuyBack.UnMortgage();
+
+                            Console.WriteLine($"Continue rebuying more mortgaged property? (Y/n)");
+                            key = Console.ReadKey(true).Key;
                         }
+                        while (key == ConsoleKey.Y);
                     }
-                    while (key == ConsoleKey.Y);
                 }
                 else
                 {
