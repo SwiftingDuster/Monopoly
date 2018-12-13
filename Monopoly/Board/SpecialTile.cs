@@ -21,7 +21,7 @@ namespace Monopoly
             {
                 case SpecialTileType.GO:
                     visitor.ReceiveMoneyFromBank(Constants.GOAllowance);
-                    Console.WriteLine($"{visitor.DisplayName} receives {Constants.GOAllowance} from the bank.");
+                    Console.WriteLine($"{visitor.DisplayName} receives {Constants.GOAllowance} from the bank for passing GO.");
                     break;
                 case SpecialTileType.Chance:
                     ChanceCard chanceCard = SpecialCardDeck.GetChanceCard();

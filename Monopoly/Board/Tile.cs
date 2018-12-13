@@ -21,7 +21,7 @@
 
     public class TileOptions
     {
-        public string DisplayName { get; internal set; }
+        public string DisplayName { get; private set; }
 
         public TileOptions(string displayName)
         {

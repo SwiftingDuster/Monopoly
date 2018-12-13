@@ -38,14 +38,23 @@ namespace Monopoly
             int round = 1;
             while (gameRunning)
             {
+                Console.WriteLine("========================================");
                 Console.WriteLine($"> Starting round {round++}.");
                 for (int i = 0; i < Players.Count; i++)
                 {
+                    Console.WriteLine("--------------------");
                     Player player = Players.Dequeue();
                     player.TakeTurn(board);
-                    if (!player.IsBankrupt) Players.Enqueue(player);
+                    if (!player.IsBankrupt)
+                    {
+                        Players.Enqueue(player);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[BANKRUPTED] {player.DisplayName} is now bankrupt.");
+                        i--;
+                    }
                 }
-                Console.WriteLine("====================");
 
                 if (Players.Count == 1)
                 {
@@ -53,8 +62,11 @@ namespace Monopoly
                 }
             }
 
+            Console.WriteLine("========================================");
+
             Player winner = Players.First();
-            int totalAssetValue = winner.OwnedTiles.Where(tile => !tile.IsMortgaged).Sum(tile => tile.TileOptions.Cost);
+            var unmortgaged = winner.OwnedTiles.Where(tile => !tile.IsMortgaged);
+            int totalAssetValue = winner.Money + unmortgaged.Sum(tile => tile.TileOptions.Cost) + unmortgaged.OfType<PropertyTile>().Sum(tile => tile.HouseCount * ((PropertyTileOptions)tile.TileOptions).HouseCost);
 
             Console.WriteLine($"{winner.DisplayName} won the game with ${winner.Money}, {winner.OwnedTiles.Count} owned properties and a total asset value of ${totalAssetValue}.");
             Console.ReadKey();

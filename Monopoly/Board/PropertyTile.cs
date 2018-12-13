@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Monopoly
 {
@@ -52,22 +53,36 @@ namespace Monopoly
             {
                 if (visitor != Owner) // Other player visiting
                 {
+                    if (IsMortgaged)
+                    {
+                        Console.WriteLine($"{visitor.DisplayName} was exempted rent because {DisplayName} is currently mortgaged.");
+                        return;
+                    }
+
                     int rent = Rent;
                     visitor.Pay(Owner, ref rent);
-                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Houses: {HouseCount}]");
+                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName}. [Houses x{HouseCount}].");
                 }
                 else // Owner visiting
                 {
+                    if (IsMortgaged)
+                    {
+                        Console.WriteLine($"{DisplayName} cannot be upgraded because it is currently mortgaged.");
+                        return;
+                    }
+
                     if (CanUpgrade(Owner))
                     {
                         if (Owner.IsHuman)
                         {
-                            Console.WriteLine($"Do you want to upgrade {DisplayName} for ${tileOptions.HouseCost}? (Y/n)");
-                            if (Console.ReadKey().Key != ConsoleKey.Y) return;
+                            Console.WriteLine($"Do you want to upgrade {DisplayName} to {HouseCount + 1} houses for ${tileOptions.HouseCost}? (Y/n)");
                         }
 
-                        Upgrade();
-                        Console.WriteLine($"{Owner.DisplayName} upgraded {DisplayName} to {HouseCount} houses for ${tileOptions.HouseCost}.");
+                        if (!visitor.IsHuman || Console.ReadKey(true).Key == ConsoleKey.Y)
+                        {
+                            Upgrade();
+                            Console.WriteLine($"{Owner.DisplayName} upgraded {DisplayName} to {HouseCount} houses for ${tileOptions.HouseCost}.");
+                        }
                     }
                 }
             }
@@ -78,11 +93,13 @@ namespace Monopoly
                     if (visitor.IsHuman)
                     {
                         Console.WriteLine($"Do you want to purchase {DisplayName} for ${tileOptions.Cost}? (Y/n)");
-                        if (Console.ReadKey().Key != ConsoleKey.Y) return;
                     }
 
-                    Purchase(visitor);
-                    Console.WriteLine($"{visitor.DisplayName} purchased {DisplayName} for ${tileOptions.Cost}.");
+                    if (!visitor.IsHuman || Console.ReadKey(true).Key == ConsoleKey.Y)
+                    {
+                        Purchase(visitor);
+                        Console.WriteLine($"{visitor.DisplayName} purchased {DisplayName} for ${tileOptions.Cost}.");
+                    }
                 }
             }
         }
@@ -113,6 +130,40 @@ namespace Monopoly
             {
                 return false;
             }
+        }
+
+        public int SellUpgrade(int priceCut = 2)
+        {
+            if (Owner)
+            {
+                if (HouseCount > 0)
+                {
+                    int returnPrice = tileOptions.HouseCost / priceCut;
+                    Owner.Money += returnPrice;
+                    Console.WriteLine($"{Owner.DisplayName} sold house {HouseCount--} of {DisplayName} at 1/{priceCut} price for ${returnPrice}.");
+                    return returnPrice;
+                }
+            }
+            return 0;
+        }
+
+        public override IEnumerable<int> Mortgage()
+        {
+            if (!Owner) throw new Exception("Attempt to get mortgaged property of tile without owner!");
+
+            if (IsMortgaged) yield break;
+
+            while (HouseCount > 0)
+            {
+                yield return SellUpgrade();
+            }
+
+            IsMortgaged = true;
+            Owner.Money += TileOptions.MortgageValue;
+            Owner.MortgagedTiles.Remove(this);
+            Console.WriteLine($"{Owner.DisplayName} has mortgaged {DisplayName} for ${TileOptions.MortgageValue}.");
+
+            yield return TileOptions.MortgageValue;
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Monopoly
 {
@@ -9,31 +10,7 @@ namespace Monopoly
 
         public Player Owner { get; protected set; }
 
-        public bool IsMortgaged
-        {
-            get
-            {
-                return isMortgaged;
-            }
-            set
-            {
-                if (!Owner) throw new Exception("Attempt to get mortgaged property of tile without owner!");
-
-                if (value)
-                {
-                    Owner.Money += TileOptions.MortgageValue;
-                }
-                else
-                {
-                    if (Owner.Money < TileOptions.MortgageValue) return;
-
-                    Owner.Money -= TileOptions.MortgageValue;
-                }
-
-                isMortgaged = value;
-            }
-        }
-        private bool isMortgaged;
+        public bool IsMortgaged { get; protected set; }
 
         public PurchasableRentTile(string displayName, int boardPosition) : base(displayName, boardPosition) { }
 
@@ -59,21 +36,53 @@ namespace Monopoly
             return player.Money > TileOptions.Cost;
         }
 
+        public virtual IEnumerable<int> Mortgage()
+        {
+            if (!Owner) throw new Exception("Attempt to get mortgaged property of tile without owner!");
+
+            if (IsMortgaged) yield break;
+
+            IsMortgaged = true;
+            Owner.Money += TileOptions.MortgageValue;
+            Owner.MortgagedTiles.Add(this);
+            Console.WriteLine($"{Owner.DisplayName} has mortgaged {DisplayName} for ${TileOptions.MortgageValue}.");
+
+            yield return TileOptions.MortgageValue;
+        }
+
+        public void UnMortgage()
+        {
+            if (!Owner) throw new Exception("Attempt to get mortgaged property of tile without owner!");
+
+            if (!IsMortgaged) return;
+
+            int unmortgageCost = TileOptions.MortgageValue * 11 / 10;
+            if (Owner.Money < unmortgageCost) return;
+
+            IsMortgaged = false;
+            Owner.Money -= unmortgageCost;
+            Owner.MortgagedTiles.Remove(this);
+            Console.WriteLine($"{Owner.DisplayName} paid ${unmortgageCost} including 10% interest to unmortgage {DisplayName}.");
+        }
+
         public void Disown()
         {
             Owner = null;
+            IsMortgaged = false;
         }
     }
 
     public class PurchasableTileOptions : TileOptions
     {
-        public int Cost { get; set; }
-        public int MortgageValue { get; set; }
+        public int Cost { get; private set; }
+        public int MortgageValue { get; private set; }
+        public int UnMortgageValue { get; private set; }
 
         public PurchasableTileOptions(string displayName, int cost, int mortageValue) : base(displayName)
         {
             Cost = cost;
             MortgageValue = mortageValue;
+            UnMortgageValue = mortageValue * 11 / 10;
         }
     }
 }

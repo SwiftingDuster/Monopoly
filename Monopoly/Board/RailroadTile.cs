@@ -52,7 +52,7 @@ namespace Monopoly
                 {
                     int rent = Rent;
                     visitor.Pay(Owner, ref rent);
-                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Owns x{Owner.OwnedTiles.Where(tile => tile is UtilityTile).Count()}.]");
+                    Console.WriteLine($"{visitor.DisplayName} paid ${rent} to {Owner.DisplayName} for visiting {tileOptions.DisplayName} [Railroads x{Owner.OwnedTiles.Where(tile => tile is UtilityTile).Count()}]");
                 }
             }
             else // Unowned property
@@ -61,12 +61,14 @@ namespace Monopoly
                 {
                     if (visitor.IsHuman)
                     {
-                        Console.WriteLine($"Do you want to purchase {DisplayName} for {tileOptions.Cost}? (Y/n)");
-                        if (Console.ReadKey().Key != ConsoleKey.Y) return;
+                        Console.WriteLine($"Do you want to purchase {DisplayName} for ${tileOptions.Cost}? (Y/n)");
                     }
 
-                    Purchase(visitor);
-                    Console.WriteLine($"{visitor.DisplayName} purchased {DisplayName} for {tileOptions.Cost}.");
+                    if (!visitor.IsHuman || Console.ReadKey(true).Key == ConsoleKey.Y)
+                    {
+                        Purchase(visitor);
+                        Console.WriteLine($"{visitor.DisplayName} purchased {DisplayName} for ${tileOptions.Cost}.");
+                    }
                 }
             }
         }

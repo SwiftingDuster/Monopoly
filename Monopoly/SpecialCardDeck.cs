@@ -43,23 +43,23 @@ namespace Monopoly
     {
         public static ChanceCard AdvanceToGo = new ChanceCard("Advance to GO. Collect $200.", (player, board, players) =>
         {
-            player.BoardLocation = board.GetSpecialTile(SpecialTileType.GO).BoardPosition;
+            player.MoveToBoardPostiion(board, board.GetSpecialTile(SpecialTileType.GO).BoardPosition);
         });
         public static ChanceCard AdvanceToIllinoisAvenue = new ChanceCard("Advance to Illinois Avenue.", (player, board, players) =>
         {
-            player.BoardLocation = board.Find(tile => tile.DisplayName.Contains("Illinois Avenue")).BoardPosition;
+            player.MoveToBoardPostiion(board, board.Find(tile => tile.DisplayName.Contains("Illinois Avenue")).BoardPosition);
         });
         public static ChanceCard AdvanceToStCharlesPlace = new ChanceCard("Advance to St. Clarles Place.", (player, board, players) =>
         {
-            player.BoardLocation = board.Find(tile => tile.DisplayName.Contains("St. Charles Place")).BoardPosition;
+            player.MoveToBoardPostiion(board, board.Find(tile => tile.DisplayName.Contains("St. Charles Place")).BoardPosition);
         });
         public static ChanceCard AdvanceToNearestUtility = new ChanceCard("Advance to nearest Utility.", (player, board, players) =>
         {
-            player.BoardLocation = board.FindNearest(NearestType.Utility, player.BoardLocation).BoardPosition;
+            player.MoveToBoardPostiion(board, board.FindNearest(NearestType.Utility, player.BoardLocation).BoardPosition);
         });
         public static ChanceCard AdvanceToNearestRailroad = new ChanceCard("Advance to nearest Railroad.", (player, board, players) =>
         {
-            player.BoardLocation = board.FindNearest(NearestType.Railroad, player.BoardLocation).BoardPosition;
+            player.MoveToBoardPostiion(board, board.FindNearest(NearestType.Railroad, player.BoardLocation).BoardPosition);
         });
         public static ChanceCard BankPaysDividend = new ChanceCard("Bank pays you diviend of $50.", (player, board, players) =>
         {
@@ -71,8 +71,7 @@ namespace Monopoly
         });
         public static ChanceCard GoBack3Space = new ChanceCard("Go Back Three Spaces.", (player, board, players) =>
         {
-            if (player.BoardLocation < 3) player.BoardLocation += Constants.GameTilesTotal;
-            player.BoardLocation -= 3;
+            player.AdvanceBoardPostiion(board, -3, true);
         });
         public static ChanceCard GoToJailDirectly = new ChanceCard("Go to Jail.", (player, board, players) =>
         {
@@ -83,7 +82,9 @@ namespace Monopoly
             var properties = player.OwnedTiles.OfType<PropertyTile>();
             int houseTotalCost = properties.Where(p => p.HouseCount < Constants.MaxHouse).Sum(p => p.HouseCount) * 25;
             int hotelTotalCost = properties.Where(p => p.HouseCount == Constants.MaxHouse).Count() * 100;
-            player.PayToBank(houseTotalCost + hotelTotalCost);
+            int total = houseTotalCost + hotelTotalCost;
+            player.PayToBank(ref total);
+            Console.WriteLine($"{player.DisplayName} paid ${total} to bank for general repairs.");
         });
         public static ChanceCard PayPoorTax = new ChanceCard("Pay poor tax of $15.", (player, board, players) =>
         {
@@ -91,11 +92,11 @@ namespace Monopoly
         });
         public static ChanceCard AdvanceToReadingRailroad = new ChanceCard("Take a trip to Reading Railroad.", (player, board, players) =>
         {
-            player.BoardLocation = board.Find(tile => tile.DisplayName.Contains("Reading Railroad")).BoardPosition;
+            player.MoveToBoardPostiion(board, board.Find(tile => tile.DisplayName.Contains("Reading Railroad")).BoardPosition);
         });
         public static ChanceCard AdvanceToBroadwalk = new ChanceCard("Take a walk on the Broadwalk. Advance token to Broadwalk.", (player, board, players) =>
         {
-            player.BoardLocation = board.Find(tile => tile.DisplayName.Contains("Broadwalk")).BoardPosition;
+            player.MoveToBoardPostiion(board, board.Find(tile => tile.DisplayName.Contains("Broadwalk")).BoardPosition);
         });
         public static ChanceCard ElectedChairmanOfTheBoard = new ChanceCard("You have been elected Chairman of the Board. Pay each player $50.", (player, board, players) =>
         {
@@ -105,6 +106,7 @@ namespace Monopoly
                 int amount = 50;
                 player.Pay(otherPlayer, ref amount);
             }
+            Console.WriteLine($"{player.DisplayName} paid $50 each to other players, totalling ${50 * (players.Count - 1)}.");
         });
         public static ChanceCard BuildingAndLoanMatures = new ChanceCard("Your building loan matures. Collect $150.", (player, board, players) =>
         {
@@ -122,7 +124,7 @@ namespace Monopoly
     {
         public static CommunityChest AdvanceToGo = new CommunityChest("Advance to GO. Collect $200", (player, board, players) =>
         {
-            player.BoardLocation = board.GetSpecialTile(SpecialTileType.GO).BoardPosition;
+            player.MoveToBoardPostiion(board, board.GetSpecialTile(SpecialTileType.GO).BoardPosition);
         });
         public static CommunityChest BankErrorInYourFavour = new CommunityChest("Bank error in your favour. Collect $200.", (player, board, players) =>
         {
@@ -169,6 +171,7 @@ namespace Monopoly
                 int amount = 10;
                 otherPlayer.Pay(player, ref amount);
             }
+            Console.WriteLine($"{player.DisplayName} collected $10 each from other players, totalling ${10 * (players.Count - 1)}.");
         });
         public static CommunityChest LifeInsuranceMatures = new CommunityChest("Life insurance matures. Collect $100.", (player, board, players) =>
         {
@@ -191,15 +194,17 @@ namespace Monopoly
             var properties = player.OwnedTiles.OfType<PropertyTile>();
             int houseTotalCost = properties.Where(p => p.HouseCount < Constants.MaxHouse).Sum(p => p.HouseCount) * 40;
             int hotelTotalCost = properties.Where(p => p.HouseCount == Constants.MaxHouse).Count() * 115;
-            player.PayToBank(houseTotalCost + hotelTotalCost);
+            int total = houseTotalCost + hotelTotalCost;
+            player.PayToBank(ref total);
+            Console.WriteLine($"{player.DisplayName} paid ${total} to bank for street repairs.");
         });
         public static CommunityChest WonSecondInBeautyContest = new CommunityChest("You have won second prize in a beauty contest. Collect $10.", (player, board, players) =>
         {
-
+            player.Money += 10;
         });
         public static CommunityChest InheritMoney = new CommunityChest("You inherit $100.", (player, board, players) =>
         {
-            player.Money += 10;
+            player.Money += 100;
         });
 
         public CommunityChest(string displayName, Action<Player, Board, Queue<Player>> action) : base(displayName, action) { }

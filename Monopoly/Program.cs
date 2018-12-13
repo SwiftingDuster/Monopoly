@@ -4,7 +4,7 @@
     {
         public static void Main(string[] args)
         {
-            Monopoly monopoly = new Monopoly(1, 3);
+            Monopoly monopoly = new Monopoly(0, 6);
             monopoly.SetUp().Start();
         }
     }
